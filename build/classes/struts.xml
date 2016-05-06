@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	
+	<constant name="struts.objectFactory" 
+		value="org.apache.struts2.spring.StrutsSpringObjectFactory" />
+	
+	<constant name="struts.custom.i18n.resources" value="messages"/>
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="false" />
+    <constant name="struts.ui.theme" value="simple"/>
+
+    <package name="default" namespace="/article" extends="struts-default,json-default">
+    
+    	<!-- 拦截器配置 -->
+    	<interceptors> 
+			
+			<!-- 定义了一个名为authority的拦截器 --> 
+			<interceptor name="articleAuthority" class="com.iyingdi.filter.ArticleFilterInterceptor"/>
+			<interceptor name="userAuthority" class="com.iyingdi.filter.UserFilterInterceptor"/> 
+			
+			<!--上面自定义的拦截器类-->
+			<interceptor-stack name="myDefault">
+		
+				<!-- 配置struts2自己的拦截器，否则将无法直接获取url中的参数 -->
+				<interceptor-ref name="paramsPrepareParamsStack">
+				</interceptor-ref>
+				
+				<!-- 引用拦截器  -->
+				<interceptor-ref name="articleAuthority"> 
+					<!-- 不需要拦截的方法 -->
+					<param name="excludeMethods"></param>
+					<!-- 设置需要拦截的方法，多个以逗号隔开 -->
+					<param name="includeMethods">operation,table,save</param>
+				</interceptor-ref>
+				
+				<!-- 引用拦截器  -->
+				<interceptor-ref name="userAuthority"> 
+					<!-- 不需要拦截的方法 -->
+					<param name="excludeMethods"></param>
+					<!-- 设置需要拦截的方法，多个以逗号隔开 -->
+					<param name="includeMethods">submit,delete,draft,info,list,isfirst</param>
+				</interceptor-ref>
+			
+			</interceptor-stack>
+			
+		</interceptors>
+		 
+		<default-interceptor-ref name="myDefault"></default-interceptor-ref>
+
+        <default-action-ref name="index" />
+
+		<global-results>
+            <result name="error" type="json">dataMap</result>
+        </global-results>
+
+		<action name="user*" method="{1}" class="com.iyingdi.action.ArticleAction">
+		    <result name="userarticle" type="json">
+		    	<param name="root">dataMap</param>
+		    </result>
+		</action>
+		
+		<action name="info*" method="{1}" class="com.iyingdi.action.UserinfoAction">
+		    <result name="ensure" type="json">
+		    	<param name="root">dataMap</param>
+		    </result>
+		</action>  
+    </package>
+
+	
+
+   
+    
+    <!-- Add packages here -->
+
+</struts>
